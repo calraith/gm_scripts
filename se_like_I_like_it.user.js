@@ -151,7 +151,7 @@ function fixTabs(e) {
 			if (!cursorMoved) newStart -= cursorInPos;
 
 			if (e.shiftKey) {
-				if (start > newStart) el.setSelectionRange(newStart, end);
+				if (start > newStart) el.setSelectionRange(newStart, end, 'backward');
 				else el.setSelectionRange(start, newStart);
 			}
 			else el.setSelectionRange(newStart, newStart);
