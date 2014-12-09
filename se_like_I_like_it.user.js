@@ -182,7 +182,8 @@ function fixTabs(e) {
 			e.preventDefault();
 
 			var newEnd = pos + inputArr[row].length;
-			
+
+			// select to next \n
 			if (e.shiftKey) el.setSelectionRange(start, newEnd);
 			else el.setSelectionRange(newEnd, newEnd);
 
@@ -193,10 +194,9 @@ function fixTabs(e) {
 
 var pre = document.getElementsByTagName('pre'),
 	history = [0,0];
-
 for (var i=0; i<pre.length; i++) {
     pre[i].addEventListener('dblclick', selectAll, true);
     pre[i].title = 'double-click to select all';
 }
 
-addEventListener('keypress', fixTabs, true);
+addEventListener('keydown', fixTabs, true);
