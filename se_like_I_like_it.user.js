@@ -4,7 +4,7 @@
 // @description Double-click a code block to select all + edit box auto indent / tab key behavior enhancements
 // @include     /^https?:\/\/(\w+\.)?(stack(overflow|exchange|apps)|serverfault|superuser|askubuntu|onstartups|mathoverflow|mso)\.com\/.+/
 // @exclude     /^https?:\/\/(chat|blog|careers)\..*/
-// @version     1
+// @version     1.1
 // @grant       none
 // ==/UserScript==
 
@@ -21,6 +21,7 @@ function fixTabs(e) {
 	var key = {
 		tab: 9,
 		enter: 13,
+		end: 35,
 		home: 36,
 		code: e.keyCode || e.charCode,
 		contains: function(what) {
@@ -30,6 +31,11 @@ function fixTabs(e) {
 			}
 		}
 	};
+
+	// capture this + previous key code to detect double home or end
+	history.push(key.code);
+	history.shift();
+
 	if (!key.contains(key.code)) return;	// not a character this script handles
 
 	var el = document.activeElement;
@@ -41,7 +47,6 @@ function fixTabs(e) {
 		end = el.selectionEnd,
 		selected = el.value.substring(start, end);
 
-	e.preventDefault();
 	var inputArr = el.value.split('\n');
 
 	// inputArr[row] contains start, and pos contains the idx of the last char of the previous line
@@ -51,11 +56,13 @@ function fixTabs(e) {
 
 		case key.tab:
 
+			e.preventDefault();
+
 			// if selection spans more than one line
 			if (selected.indexOf('\n') > -1) {
 				// count number of rows included in selection
 				var rowsSelected = selected.split('\n').length;
-				
+
 				// expand selection to cover beginning of start row until end of end row
 				// replace all 4-space sequences with a tab and update position indexes
 				// if shift key, remove one level of indent per selected row; otherwise, add a level of indent.
@@ -75,7 +82,7 @@ function fixTabs(e) {
 					+ '\t'
 					+ el.value.substring(end);
 				el.setSelectionRange(++start, start);
-			
+
 			// otherwise, handle shift+tab
 			} else {
 
@@ -99,7 +106,7 @@ function fixTabs(e) {
 						tempCursor = cursorInPos - indentLevel,
 						tabStop = !(tempCursor % 4);
 				}
-				
+
 				// If cursor was not moved, outdent.
 				if (!cursorMoved) {
 					if (/\s/.test(inputArr[row].substr(cursorInPos, 1))) start++;
@@ -113,7 +120,9 @@ function fixTabs(e) {
 		break;
 
 		case key.enter:
-		
+
+			e.preventDefault();
+
 			// ctrl+Enter to submit
 			if (e.ctrlKey) {
 				do { var parent = el.parentNode; } while (parent && parent.nodeName.toLowerCase() !== 'form');
@@ -134,6 +143,12 @@ function fixTabs(e) {
 		case key.home:
 
 			var cursorInPos = start - pos, newStart = start, cursorMoved;
+
+			// If not double-pressed and line is wrapped, allow default behavior
+			if (start > el.cols && history[0] !== key.home) return;
+			if (history[0] == history[1]) history[1] = 0;
+
+			e.preventDefault();
 
 			// If cursor is in the whitespace at the beginning of the line, advance to text
 			while (cursorInPos < inputArr[row].length && /\s/.test(inputArr[row].substr(cursorInPos, 1))) {
@@ -158,10 +173,27 @@ function fixTabs(e) {
 
 		break;
 
+		case key.end:
+
+			// if not double-pressed, allow default behavior.
+			if (inputArr[row].length <= el.cols || history[0] !== key.end) return;
+			if (history[0] == history[1]) history[1] = 0;
+
+			e.preventDefault();
+
+			var newEnd = pos + inputArr[row].length;
+			
+			if (e.shiftKey) el.setSelectionRange(start, newEnd);
+			else el.setSelectionRange(newEnd, newEnd);
+
+		break;
+
 	}	// end switch(key.code)
 }	// end fixTabs()
 
-var pre = document.getElementsByTagName('pre');
+var pre = document.getElementsByTagName('pre'),
+	history = [0,0];
+
 for (var i=0; i<pre.length; i++) {
     pre[i].addEventListener('dblclick', selectAll, true);
     pre[i].title = 'double-click to select all';
