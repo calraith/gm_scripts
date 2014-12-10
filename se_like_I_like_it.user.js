@@ -4,7 +4,7 @@
 // @description Double-click a code block to select all + edit box auto indent / tab key behavior enhancements
 // @include     /^https?:\/\/(\w+\.)?(stack(overflow|exchange|apps)|serverfault|superuser|askubuntu|onstartups|mathoverflow|mso)\.com\/.+/
 // @exclude     /^https?:\/\/(chat|blog|careers)\..*/
-// @version     1.1
+// @version     1.2
 // @downloadURL	https://github.com/calraith/gm_scripts/raw/master/se_like_I_like_it.user.js
 // @grant       none
 // ==/UserScript==
@@ -148,7 +148,7 @@ function fixTabs(e) {
 			var cursorInPos = start - pos, newStart = start, cursorMoved;
 
 			// If not double-pressed and line is wrapped, allow default behavior
-			if (start > el.cols && history[0] !== key.home) return;
+			if (cursorInPos > el.cols && history[0] !== key.home) return;
 			if (history[0] == history[1]) history[1] = 0;
 
 			e.preventDefault();
