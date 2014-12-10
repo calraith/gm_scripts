@@ -26,11 +26,9 @@ function fixTabs(e) {
 		home: 36,
 		code: e.keyCode || e.charCode,
 		contains: function(what) {
-			// faster than for...in
-			// see http://jsperf.com/iterating-over-object-properties/2
-			for (var i=0, keys = Object.keys(this), l = keys.length; i < l; i++) {
-				if (keys[i] === 'code') return false;
-				if (this[keys[i]] === what) return true;
+			for (var i in this) {
+				if (i === 'code') return false;
+				if (this[i] === what) return true;
 			}
 		}
 	};
@@ -135,7 +133,6 @@ function fixTabs(e) {
 			// unify indentation of previous line as tabs
 			inputArr[row] = inputArr[row].replace(/ {4}/g,function(){start-=3;return '\t'});
 			var indent = inputArr[row].match(/^\t+/) || [''], indent = indent[0];
-
 			el.value = el.value.substring(0, start)
 				+ '\n' + indent
 				+ el.value.substring(end);
