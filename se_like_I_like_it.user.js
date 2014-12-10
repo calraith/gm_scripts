@@ -26,6 +26,8 @@ function fixTabs(e) {
 		home: 36,
 		code: e.keyCode || e.charCode,
 		contains: function(what) {
+			// fastest loop method for this application
+			// see http://jsperf.com/object-iteration-like-a-boss
 			for (var i in this) {
 				if (i === 'code') return false;
 				if (this[i] === what) return true;
