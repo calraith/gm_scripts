@@ -4,7 +4,7 @@
 // @description Double-click a code block to select all + edit box auto indent / tab key behavior enhancements
 // @include     /^https?:\/\/(\w+\.)?(stack(overflow|exchange|apps)|serverfault|superuser|askubuntu|onstartups|mathoverflow|mso)\.com\/.+/
 // @exclude     /^https?:\/\/(chat|blog|careers)\..*/
-// @version     1.4
+// @version     1.4.1
 // @downloadURL	https://github.com/calraith/gm_scripts/raw/master/se_like_I_like_it.user.js
 // @grant       none
 // ==/UserScript==
@@ -120,8 +120,8 @@ function fixTabs(e) {
 
 			// ctrl+Enter to submit
 			if (e.ctrlKey) {
-				do { var parent = el.parentNode; } while (parent && parent.nodeName.toLowerCase() !== 'form');
-				return parent.submit();
+				do { el = el.parentNode || null; } while (el && el.nodeName.toLowerCase() !== 'form');
+				return el ? el.submit() : false;
 			}
 
 			// unify indentation of previous line as tabs
