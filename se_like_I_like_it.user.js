@@ -4,18 +4,10 @@
 // @description Double-click a code block to select all + edit box auto indent / tab key behavior enhancements
 // @include     /^https?:\/\/(\w+\.)?(stack(overflow|exchange|apps)|serverfault|superuser|askubuntu|onstartups|mathoverflow|mso)\.com\/.+/
 // @exclude     /^https?:\/\/(chat|blog|careers)\..*/
-// @version     1.3
+// @version     1.4
 // @downloadURL	https://github.com/calraith/gm_scripts/raw/master/se_like_I_like_it.user.js
 // @grant       none
 // ==/UserScript==
-
-function selectAll() {
-    var range = document.createRange();
-    range.selectNodeContents(this.childNodes[0]);
-    var selection = window.getSelection();
-    selection.removeAllRanges();
-    selection.addRange(range);
-}
 
 function fixTabs(e) {
 	e = e || event;
@@ -196,11 +188,38 @@ function fixTabs(e) {
 	}	// end switch(key.code)
 }	// end fixTabs()
 
-var pre = document.getElementsByTagName('pre'),
-	history = [0,0];
-for (var i=0; i<pre.length; i++) {
-    pre[i].addEventListener('dblclick', selectAll, true);
-    pre[i].title = 'double-click to select all';
+var history = [0,0];
+addEventListener('keydown', fixTabs, true);
+
+/* end keyboard behavior mods */
+
+function selectAll() {
+    var range = document.createRange();
+	// select parent if parent === <pre>; else select self
+    range.selectNodeContents(this.nodeName.toLowerCase() === 'pre' ? this.childNodes[0] : this);
+    var selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
 }
 
-addEventListener('keydown', fixTabs, true);
+function addDblClick() {
+	var code = document.getElementsByTagName('code');
+	for (var i=0; i<code.length; i++) {
+		/* ====================================================================
+		If parent node is <pre>, add listener to parent.  This allows double-
+		clicking anywhere within a code block to select all, as well as double-
+		clicking inline code snippets the poster enclosed in backticks.
+		==================================================================== */
+		var node = (code[i].parentNode.nodeName.toLowerCase() === 'pre' ? code[i].parentNode : code[i]);
+		node.removeEventListener('dblclick', selectAll, true);
+		node.addEventListener('dblclick', selectAll, true);
+		node.title = 'double-click to select all';
+	}
+}
+addDblClick();
+
+// listen for stuff like "show 1 more comment"
+var creep = new MutationObserver(addDblClick);
+creep.observe(document, {subtree: true, childList: true});
+
+/* end double-click mods */
