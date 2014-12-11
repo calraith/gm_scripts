@@ -4,7 +4,7 @@
 // @description Double-click a code block to select all + edit box auto indent / tab key behavior enhancements
 // @include     /^https?:\/\/(\w+\.)?(stack(overflow|exchange|apps)|serverfault|superuser|askubuntu|onstartups|mathoverflow|mso)\.com\/.+/
 // @exclude     /^https?:\/\/(chat|blog|careers)\..*/
-// @version     1.2
+// @version     1.3
 // @downloadURL	https://github.com/calraith/gm_scripts/raw/master/se_like_I_like_it.user.js
 // @grant       none
 // ==/UserScript==
@@ -135,7 +135,8 @@ function fixTabs(e) {
 			// unify indentation of previous line as tabs
 			inputArr[row] = inputArr[row].replace(/ {4}/g,function(){start-=3;return '\t'});
 			var indent = inputArr[row].match(/^\t+/) || [''], indent = indent[0];
-			el.value = el.value.substring(0, start)
+			el.value = el.value.substring(0, pos)
+				+ inputArr[row]
 				+ '\n' + indent
 				+ el.value.substring(end);
 			start+=indent.length+1;
