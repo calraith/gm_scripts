@@ -127,8 +127,10 @@ function fixTabs(e) {
 			// unify indentation of previous line as tabs
 			inputArr[row] = inputArr[row].replace(/ {4}/g,function(){start-=3;return '\t'});
 			var indent = inputArr[row].match(/^\t+/) || [''], indent = indent[0];
+			
+			// insert newline + indent, disintegrating user selection if any
 			el.value = el.value.substring(0, pos)
-				+ inputArr[row]
+				+ inputArr[row].substring(0, start - pos)
 				+ '\n' + indent
 				+ el.value.substring(end);
 			start+=indent.length+1;
