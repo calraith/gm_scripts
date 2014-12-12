@@ -4,7 +4,7 @@
 // @description Double-click a code block to select all + edit box auto indent / tab key behavior enhancements
 // @include     /^https?:\/\/(\w+\.)?(stack(overflow|exchange|apps)|serverfault|superuser|askubuntu|onstartups|mathoverflow|mso)\.com\/.+/
 // @exclude     /^https?:\/\/(chat|blog|careers)\..*/
-// @version     1.4.2
+// @version     1.4.3
 // @downloadURL	https://github.com/calraith/gm_scripts/raw/master/se_like_I_like_it.user.js
 // @grant       none
 // ==/UserScript==
@@ -66,7 +66,7 @@ function fixTabs(e) {
 				// if shift key, remove one level of indent per selected row; otherwise, add a level of indent.
 				for (start = pos, stop = row + rowsSelected; row < stop; row++) {
 					inputArr[row] = inputArr[row].replace(/ {4}/g,'\t');
-					inputArr[row] = (e.shiftKey) ? inputArr[row].replace(/^\t/,'') : '\t' + inputArr[row];
+					inputArr[row] = (e.shiftKey) ? inputArr[row].replace(/^( +|\t)/,'') : '\t' + inputArr[row].replace(/^ +/,'');
 					pos+=inputArr[row].length + 1;
 				}
 				end = --pos;
@@ -99,8 +99,7 @@ function fixTabs(e) {
 				while (cursorInPos && /\S/.test(inputArr[row].substring(0,cursorInPos)) && !tabStop) {
 					cursorMoved = start--;
 					cursorInPos--;
-					var indentLevel = inputArr[row].match(/^\s+/) || [''],
-						indentLevel = indentLevel[0].length,
+					var indentLevel = (inputArr[row].match(/^\s+/) || [''])[0].length,
 						tempCursor = cursorInPos - indentLevel,
 						tabStop = !(tempCursor % 4);
 				}
@@ -108,8 +107,10 @@ function fixTabs(e) {
 				// If cursor was not moved, outdent.
 				if (!cursorMoved) {
 					if (/\s/.test(inputArr[row].substr(cursorInPos, 1))) start++;
-					inputArr[row] = inputArr[row].replace(/ {4}/g,function(){start-=3;return '\t'});
-					inputArr[row] = inputArr[row].replace(/^\t/,function(){if (start > pos) start--;return ''});
+					inputArr[row] = inputArr[row].replace(/ {4}/g,function(){start-=3;return '\t';});
+					inputArr[row] = inputArr[row].replace(/^( +|\t)/,
+						function($1) { if (start > pos) start -= $1.length; return ''; }
+					);
 					el.value = inputArr.join('\n');
 				}
 				el.setSelectionRange(start, start);
@@ -129,9 +130,9 @@ function fixTabs(e) {
 
 			// unify indentation of previous line as tabs
 			inputArr[row] = inputArr[row].replace(/ {4}/g,function(){start-=3;return '\t'});
-			var indent = inputArr[row].match(/^\t+/) || [''], indent = indent[0];
+			var indent = (inputArr[row].match(/^\s+/) || [''])[0];
 
-			// insert newline + indent, discarding content of user selection if any
+			// insert newline + indent, disintegrating user selection if any
 			el.value = el.value.substring(0, pos)
 				+ inputArr[row].substring(0, start - pos)
 				+ '\n' + indent
