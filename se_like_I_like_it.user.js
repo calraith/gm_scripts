@@ -4,32 +4,35 @@
 // @description Double-click a code block to select all + edit box auto indent / tab key behavior enhancements
 // @include     /^https?:\/\/(\w+\.)?(stack(overflow|exchange|apps)|serverfault|superuser|askubuntu|onstartups|mathoverflow|mso)\.com\/.+/
 // @exclude     /^https?:\/\/(chat|blog|careers)\..*/
-// @version     1.4.1
+// @version     1.4.2
 // @downloadURL	https://github.com/calraith/gm_scripts/raw/master/se_like_I_like_it.user.js
 // @grant       none
 // ==/UserScript==
 
+var key = {
+	tab: 9,
+	enter: 13,
+	end: 35,
+	home: 36,
+	code: 0,
+	history: [0,0],
+	contains: function(what) {
+		// fastest loop method for this application
+		// see http://jsperf.com/object-iteration-like-a-boss
+		for (var i in this) {
+			if (i === 'code') return false;
+			if (this[i] === what) return true;
+		}
+	}
+};
+
 function fixTabs(e) {
 	e = e || event;
-	var key = {
-		tab: 9,
-		enter: 13,
-		end: 35,
-		home: 36,
-		code: e.keyCode || e.charCode,
-		contains: function(what) {
-			// fastest loop method for this application
-			// see http://jsperf.com/object-iteration-like-a-boss
-			for (var i in this) {
-				if (i === 'code') return false;
-				if (this[i] === what) return true;
-			}
-		}
-	};
+	key.code = e.keyCode || e.charCode;
 
 	// capture this + previous key code to detect double home or end
-	history.push(key.code);
-	history.shift();
+	key.history.push(key.code);
+	key.history.shift();
 
 	if (!key.contains(key.code)) return;	// not a character this script handles
 
@@ -127,8 +130,8 @@ function fixTabs(e) {
 			// unify indentation of previous line as tabs
 			inputArr[row] = inputArr[row].replace(/ {4}/g,function(){start-=3;return '\t'});
 			var indent = inputArr[row].match(/^\t+/) || [''], indent = indent[0];
-			
-			// insert newline + indent, disintegrating user selection if any
+
+			// insert newline + indent, discarding content of user selection if any
 			el.value = el.value.substring(0, pos)
 				+ inputArr[row].substring(0, start - pos)
 				+ '\n' + indent
@@ -143,8 +146,8 @@ function fixTabs(e) {
 			var cursorInPos = start - pos, newStart = start, cursorMoved;
 
 			// If not double-pressed and line is wrapped, allow default behavior
-			if (cursorInPos > el.cols && history[0] !== key.home) return;
-			if (history[0] == history[1]) history[1] = 0;
+			if (cursorInPos > el.cols && key.history[0] !== key.home) return;
+			if (key.history[0] == key.history[1]) key.history[1] = 0;
 
 			e.preventDefault();
 
@@ -174,8 +177,8 @@ function fixTabs(e) {
 		case key.end:
 
 			// if not double-pressed, allow default behavior.
-			if (inputArr[row].length <= el.cols || history[0] !== key.end) return;
-			if (history[0] == history[1]) history[1] = 0;
+			if (inputArr[row].length <= el.cols || key.history[0] !== key.end) return;
+			if (key.history[0] == key.history[1]) key.history[1] = 0;
 
 			e.preventDefault();
 
@@ -190,18 +193,17 @@ function fixTabs(e) {
 	}	// end switch(key.code)
 }	// end fixTabs()
 
-var history = [0,0];
 addEventListener('keydown', fixTabs, true);
 
 /* end keyboard behavior mods */
 
 function selectAll() {
-    var range = document.createRange();
+	var range = document.createRange();
 	// select parent if parent === <pre>; else select self
-    range.selectNodeContents(this.nodeName.toLowerCase() === 'pre' ? this.childNodes[0] : this);
-    var selection = window.getSelection();
-    selection.removeAllRanges();
-    selection.addRange(range);
+	range.selectNodeContents(this.nodeName.toLowerCase() === 'pre' ? this.childNodes[0] : this);
+	var selection = window.getSelection();
+	selection.removeAllRanges();
+	selection.addRange(range);
 }
 
 function addDblClick() {
