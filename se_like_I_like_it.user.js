@@ -4,7 +4,7 @@
 // @description Double-click a code block to select all + edit box auto indent / tab key behavior enhancements
 // @include     /^https?:\/\/(\w+\.)?(stack(overflow|exchange|apps)|serverfault|superuser|askubuntu|onstartups|mathoverflow|mso)\.com\/.+/
 // @exclude     /^https?:\/\/(chat|blog|careers)\..*/
-// @version     1.4.3
+// @version     1.5
 // @downloadURL	https://github.com/calraith/gm_scripts/raw/master/se_like_I_like_it.user.js
 // @grant       none
 // ==/UserScript==
@@ -43,8 +43,30 @@ function fixTabs(e) {
 	// All systems go!
 	var start = el.selectionStart,
 		end = el.selectionEnd,
-		selected = el.value.substring(start, end);
+		shiftStart = shiftEnd = 0,
+		// indent regexp replacement function
+		tabFill = function(match, $1, offset) {
+			for (var i=0, ret='', len=match.length, m=len / 4; i<m; i++) ret += '\t';
+			// compensate for cursor drift
+			if (offset < start) {
+				shiftStart -= (len - i);
+				if (offset + len > start) shiftStart += offset + len - start;
+			}
+			if (offset < end) {
+				shiftEnd -= (len - i);
+				if (offset + len > end) shiftEnd += offset + len - end;
+			}
+			return ret;
+		};
 
+	// Replace space indents with tabs.
+	el.value = el.value.replace(/(?:^\t*)( {4})+/mg, tabFill);
+	if (shiftStart) {
+		start += shiftStart; end += shiftEnd;
+		el.setSelectionRange(start, end);
+	}
+
+	selected = el.value.substring(start, end);
 	var inputArr = el.value.split('\n');
 
 	// inputArr[row] contains start, and pos contains the idx of the last char of the previous line
@@ -65,20 +87,20 @@ function fixTabs(e) {
 				// replace all 4-space sequences with a tab and update position indexes
 				// if shift key, remove one level of indent per selected row; otherwise, add a level of indent.
 				for (start = pos, stop = row + rowsSelected; row < stop; row++) {
-					inputArr[row] = inputArr[row].replace(/ {4}/g,'\t');
-					inputArr[row] = (e.shiftKey) ? inputArr[row].replace(/^( +|\t)/,'') : '\t' + inputArr[row].replace(/^ +/,'');
+					inputArr[row] = (e.shiftKey) ? inputArr[row].replace(/^( {4}|\t)/,'') : '\t' + inputArr[row];
 					pos+=inputArr[row].length + 1;
 				}
 				end = --pos;
 				el.value = inputArr.join('\n');
 				el.setSelectionRange(start, end);
 
-			// else selection does not span multiple line.
-			// If not shift key, simply insert a tab and advance the cursor.
+			// else selection does not span multiple lines.
+			// If not shift key, simply insert a tab (overwriting any leading spaces) and advance the cursor.
 			} else if (!e.shiftKey) {
-				el.value = el.value.substring(0, start)
+
+				el.value = el.value.substring(0, start).replace(/( +)$/, function($1) { start -= $1.length; return ''; })
 					+ '\t'
-					+ el.value.substring(end);
+					+ el.value.substring(end).replace(/^ +/, '');
 				el.setSelectionRange(++start, start);
 
 			// otherwise, handle shift+tab
@@ -106,8 +128,7 @@ function fixTabs(e) {
 
 				// If cursor was not moved, outdent.
 				if (!cursorMoved) {
-					if (/\s/.test(inputArr[row].substr(cursorInPos, 1))) start++;
-					inputArr[row] = inputArr[row].replace(/ {4}/g,function(){start-=3;return '\t';});
+					if (/\s/.test(inputArr[row].charAt(cursorInPos))) start++;
 					inputArr[row] = inputArr[row].replace(/^( +|\t)/,
 						function($1) { if (start > pos) start -= $1.length; return ''; }
 					);
@@ -129,10 +150,9 @@ function fixTabs(e) {
 			}
 
 			// unify indentation of previous line as tabs
-			inputArr[row] = inputArr[row].replace(/ {4}/g,function(){start-=3;return '\t'});
 			var indent = (inputArr[row].match(/^\s+/) || [''])[0];
 
-			// insert newline + indent, disintegrating user selection if any
+			// insert newline + indent, discarding contents of user selection if any
 			el.value = el.value.substring(0, pos)
 				+ inputArr[row].substring(0, start - pos)
 				+ '\n' + indent
@@ -153,7 +173,7 @@ function fixTabs(e) {
 			e.preventDefault();
 
 			// If cursor is in the whitespace at the beginning of the line, advance to text
-			while (cursorInPos < inputArr[row].length && /\s/.test(inputArr[row].substr(cursorInPos, 1))) {
+			while (cursorInPos < inputArr[row].length && /\s/.test(inputArr[row].charAt(cursorInPos))) {
 				cursorMoved = newStart++;
 				cursorInPos++;
 			}
