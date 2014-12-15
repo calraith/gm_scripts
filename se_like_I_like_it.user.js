@@ -2,13 +2,22 @@
 // @name        Stack Exchange like I like it
 // @namespace   http://stackapps.org/
 // @description Double-click a code block to select all + edit box auto indent / tab key behavior enhancements
-// @include     /^https?:\/\/(\w+\.)?(stack(overflow|exchange|apps)|serverfault|superuser|askubuntu|onstartups|mathoverflow|mso)\.com\/.+/
+// @match		*://stackexchange.com/*
+// @match		*://*.stackexchange.com/*/*
+// @match		*://stackoverflow.com/*/*
+// @match		*://*.stackoverflow.com/*/*
+// @match		*://stackapps.com/*/*
+// @match		*://serverfault.com/*/*
+// @match		*://superuser.com/*/*
+// @match		*://askubuntu.com/*/*
+// @match		*://mathoverflow.net/*/*
 // @exclude     /^https?:\/\/(chat|blog|careers)\..*/
-// @version     1.5
+// @version     1.5.1
 // @downloadURL	https://github.com/calraith/gm_scripts/raw/master/se_like_I_like_it.user.js
-// @grant       none
+// @grant       GM_info
 // ==/UserScript==
 
+// \/.+/
 var key = {
 	tab: 9,
 	enter: 13,
@@ -248,3 +257,33 @@ var creep = new MutationObserver(addDblClick);
 creep.observe(document, {subtree: true, childList: true});
 
 /* end double-click mods */
+
+// If on http://stackexchange.com/, check for sites not included in metadata @match directives
+if (/https?:\/\/stackexchange\.com/i.test(location.href) && GM_info) {
+	var XHR = new XMLHttpRequest();
+	with (XHR) {
+		open("GET", "http://stackexchange.com/sites?view=list", true);
+		onerror = function() { return false; };
+		onload = function() { return true; };
+		onreadystatechange = function() {
+			if (XHR.readyState == 4) {
+				var dom = document.implementation.createHTMLDocument();
+				dom.documentElement.innerHTML = XHR.responseText;
+				var list = dom.getElementsByClassName('list-view-container')[0].getElementsByTagName('a');
+				var matches = GM_info.script.matches;
+				for (var i=found=0; i<list.length; i++) {
+					if (/(twitter|blog)/i.test(list[i].href)) continue;
+					for (var j=0; j<matches.length; j++) {
+						var rxp = new RegExp('^' + matches[j].replace(/\/\*$/,'').replace(/[\.\/\*]/g, function(m) {
+							return (m == '*') ? '.*' : '\\' + m;
+						}) + '$', 'i');
+						if (rxp.test(list[i].href)) { found=1; break; }
+					}
+					if (!found) console.log('New stackexchange domain: ' + list[i].href);
+					else found=0;
+				}
+			}
+		};
+		send('');
+	}
+}
