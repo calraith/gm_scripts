@@ -2,8 +2,16 @@
 // @name        SE realtime dates
 // @namespace   http://stackapps.com/
 // @description show Stack Exchange timestamps as realtime counters
-// @include     /^https?:\/\/(\w+\.)?(stack(overflow|exchange|apps)|serverfault|superuser|askubuntu|onstartups|mathoverflow|mso)\.com\/.+/
-// @version     1
+// @match		*://stackexchange.com/*
+// @match		*://*.stackexchange.com/*/*
+// @match		*://stackoverflow.com/*/*
+// @match		*://*.stackoverflow.com/*/*
+// @match		*://stackapps.com/*/*
+// @match		*://serverfault.com/*/*
+// @match		*://superuser.com/*/*
+// @match		*://askubuntu.com/*/*
+// @match		*://mathoverflow.net/*/*
+// @version     1.1
 // @downloadURL	https://github.com/calraith/gm_scripts/raw/master/se_grace_timer.user.js
 // @grant       none
 // ==/UserScript==
