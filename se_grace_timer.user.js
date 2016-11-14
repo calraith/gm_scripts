@@ -1,19 +1,19 @@
 // ==UserScript==
-// @name		SE realtime dates
-// @namespace   http://stackapps.com/
-// @description show Stack Exchange timestamps as realtime counters
-// @match		*://stackexchange.com/*
-// @match		*://*.stackexchange.com/*/*
-// @match		*://stackoverflow.com/*/*
-// @match		*://*.stackoverflow.com/*/*
-// @match		*://stackapps.com/*/*
-// @match		*://serverfault.com/*/*
-// @match		*://superuser.com/*/*
-// @match		*://askubuntu.com/*/*
-// @match		*://mathoverflow.net/*/*
-// @version	 1.2.1
-// @downloadURL	https://github.com/calraith/gm_scripts/raw/master/se_grace_timer.user.js
-// @grant	   none
+// @name         SE realtime dates
+// @namespace    http://stackapps.com/
+// @description  show Stack Exchange timestamps as realtime counters
+// @match        *://stackexchange.com/*
+// @match        *://*.stackexchange.com/*/*
+// @match        *://stackoverflow.com/*/*
+// @match        *://*.stackoverflow.com/*/*
+// @match        *://stackapps.com/*/*
+// @match        *://serverfault.com/*/*
+// @match        *://superuser.com/*/*
+// @match        *://askubuntu.com/*/*
+// @match        *://mathoverflow.net/*/*
+// @version      1.2.1
+// @downloadURL  https://github.com/calraith/gm_scripts/raw/master/se_grace_timer.user.js
+// @grant        none
 // ==/UserScript==
 
 function setIntervalWithContext(code, delay, context) {
