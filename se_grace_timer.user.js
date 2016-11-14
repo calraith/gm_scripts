@@ -11,7 +11,7 @@
 // @match		*://superuser.com/*/*
 // @match		*://askubuntu.com/*/*
 // @match		*://mathoverflow.net/*/*
-// @version     1.1
+// @version     1.2
 // @downloadURL	https://github.com/calraith/gm_scripts/raw/master/se_grace_timer.user.js
 // @grant       none
 // ==/UserScript==
@@ -28,12 +28,14 @@ function startTimer(el) {
     this.interval = setIntervalWithContext(function() {
         if (!this.el) return clearInterval(this.interval);
         var x = (new Date() - new Date(this.el.title.replace(' ','T'))) / 1000;
-        if (x>299&&x<360) this.el.innerHTML = '5 mins ago';
-        if (isNaN(x) || x > 299) return clearInterval(this.interval);
-        var m = Math.floor(x / 60) % 60,
-            s = Math.floor(x % 60),
-            s = (s < 10) ? '0' + s : s;
-        this.el.innerHTML = m+':'+s+' ago';
+		if (x > -1) {
+			if (x>299&&x<360) this.el.innerHTML = '5 mins ago';
+			if (isNaN(x) || x > 299) return clearInterval(this.interval);
+			var m = Math.floor(x / 60) % 60,
+				s = Math.floor(x % 60),
+				s = (s < 10) ? '0' + s : s;
+			this.el.innerHTML = m+':'+s+' ago';
+		}
     }, 250, this);
     timers.push(this.interval);
 }
