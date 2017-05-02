@@ -12,7 +12,7 @@
 // @match		*://askubuntu.com/*/*
 // @match		*://mathoverflow.net/*/*
 // @exclude     /^https?:\/\/(chat|blog|careers)\..*/
-// @version     1.5.1
+// @version     1.5.1.1
 // @downloadURL	https://github.com/calraith/gm_scripts/raw/master/se_like_I_like_it.user.js
 // @grant       GM_info
 // ==/UserScript==
@@ -262,7 +262,7 @@ creep.observe(document, {subtree: true, childList: true});
 if (/https?:\/\/stackexchange\.com/i.test(location.href) && GM_info) {
 	var XHR = new XMLHttpRequest();
 	with (XHR) {
-		open("GET", "http://stackexchange.com/sites?view=list", true);
+		open("GET", "/sites?view=list", true);
 		onerror = function() { return false; };
 		onload = function() { return true; };
 		onreadystatechange = function() {
