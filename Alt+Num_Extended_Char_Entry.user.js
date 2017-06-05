@@ -1,11 +1,11 @@
 // ==UserScript==
-// @name        Alt+Num Extended Char Entry
-// @namespace   https://stackapps.org/
-// @description hold Alt while pressing numbers to make extended characters
-// @match     *://*/*
-// @version     1
-// @grant       none
-// @run-at		document-idle
+// @name			Alt+Num Extended Char Entry
+// @namespace		https://stackapps.org/
+// @description	hold Alt while pressing numbers to make extended characters
+// @match			*://*/*
+// @version		1
+// @grant			none
+// @run-at			document-idle
 // @downloadURL	https://github.com/calraith/gm_scripts/raw/master/Alt+Num_Extended_Char_Entry.user.js
 // ==/UserScript==
 
