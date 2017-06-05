@@ -58,11 +58,13 @@ function simulateNumPad(e) {
 		// insert symbol at current caret pos and advance caret
 		if (el.setSelectionRange) {
 			
+			// textarea or input
 			el.value = el.value.substring(0, start) + symbol + el.value.substring(end);
 			el.setSelectionRange(++start, start);
 			
 		} else {
-
+			
+			// contentEditable node
 			var sel = el.ownerDocument.getSelection(),
 				range = sel.getRangeAt(0);
 
