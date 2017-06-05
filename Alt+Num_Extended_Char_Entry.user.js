@@ -3,7 +3,7 @@
 // @namespace   https://stackapps.org/
 // @description hold Alt while pressing numbers to make extended characters
 // @match       *://*/*
-// @version     1.2
+// @version     1.2.1
 // @grant       none
 // @downloadURL https://github.com/calraith/gm_scripts/raw/master/Alt+Num_Extended_Char_Entry.user.js
 // @run-at      document-end
@@ -46,7 +46,7 @@ function init(obj) {
 
 		script.contentType = 'application/javascript;charset=utf-8';
 		script.onload = function(){ init(obj); };
-		script.src = 'https://cdn.rawgit.com/SheetJS/js-codepage/master/' + src;
+		script.src = 'https://cdn.rawgit.com/SheetJS/js-codepage/14644b57/' + src;
 
 		document.getElementsByTagName('HEAD')[0].appendChild(script);
 		console.log('Alt+Num_Extended_Char_Entry: ' + src + ' ready');
