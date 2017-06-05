@@ -9,6 +9,8 @@
 // @run-at      document-end
 // ==/UserScript==
 
+if (self != top) return; // only run in parent window
+
 var codepage = 0; // Leave 0 to attempt autodetect, or specify with "var codepage = 437" or similar.
 
 // If you're curious about the source of this list, I used a PowerShell command similar
@@ -45,8 +47,6 @@ if (!codepage) codepage = {'ar':720,'bg':866,'ca':850,'zh-hans':936,'cs':852,'da
 	'es-ec':850,'sr-cyrl-me':855,'ar-kw':720,'en-ph':437,'es-cl':850,'ar-ae':720,'es-uy':850,'ar-bh':720,
 	'es-py':850,'ar-qa':720,'en-in':437,'es-bo':850,'en-my':437,'es-sv':850,'en-sg':437,'es-hn':850,'es-ni':850,
 	'es-pr':850,'es-us':850,'zh-hant':950,'sr':855}[navigator.language.toLowerCase()] || 437; // (default en-US)
-
-if (self != top) return;
 
 // holds a list of number keys pressed while alt is held down
 var combo = [],
