@@ -1,13 +1,16 @@
-﻿// ==UserScript==
+// ==UserScript==
 // @name        Alt+Num Extended Char Entry
 // @namespace   https://stackapps.org/
 // @description hold Alt while pressing numbers to make extended characters
 // @match       *://*/*
-// @version	    1.1
+// @version     1.2
 // @grant       none
 // @downloadURL https://github.com/calraith/gm_scripts/raw/master/Alt+Num_Extended_Char_Entry.user.js
 // @run-at      document-end
 // ==/UserScript==
+
+// In Windows, you can view your native codepage by opening a cmd or PowerShell console and entering chcp
+var codepage=437; // 437 is the en-US codepage
 
 if (self != top) return;
 
@@ -32,6 +35,28 @@ function iFramesToo() {
 		catch (err) {}
 	}
 }
+
+// import codepage abstractions
+// Credit: https://github.com/SheetJS/js-codepage
+function init(obj) {
+	if (obj.idx >= obj.src.length) return;
+	try {
+		var src = obj.src[obj.idx++],
+			script = document.createElement('script');
+
+		script.contentType = 'application/javascript;charset=utf-8';
+		script.onload = function(){ init(obj); };
+		script.src = 'https://cdn.rawgit.com/SheetJS/js-codepage/master/' + src;
+
+		document.getElementsByTagName('HEAD')[0].appendChild(script);
+		console.log('Alt+Num_Extended_Char_Entry: ' + src + ' ready');
+	}
+	catch(err) {
+		console.log(err.message);
+		console.log('Codepage translations unavailable.  Only Unicode key combos will work.');
+	}
+}
+init({src: ["cptable.js","cputils.js"], idx: 0});
 
 function safeSimulateNumPad(e) {
 	try { simulateNumPad(e); }
@@ -61,11 +86,10 @@ function simulateNumPad(e) {
 
 	} else if (combo.length) {
 
-		// if key combo doesn't start with a zero, retrieve higher Unicode glyphs
-		// alt+0176 = °, whereas alt+234 = Ω
-		symbol = String.fromCharCode(
-			(combo[0]) ? combo.join('') * 1 + 703 : combo.join('')
-		);
+		// if key combo doesn't start with a zero, retrieve codepage table glyph
+		// alt+0176 = °, whereas alt+234 = Ω (for codepage 437)
+		symbol = (combo[0] && (combo.join('') * 1 <= 255)) ?
+			cptable[codepage].dec[combo.join('')] : String.fromCharCode(combo.join(''));
 
 		console.log('symbol: ' + symbol);
 
