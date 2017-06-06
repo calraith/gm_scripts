@@ -3,7 +3,7 @@
 // @namespace   https://stackapps.org/
 // @description Alt+numbers for extended characters; Alt+x convert hex value preceding caret to Unicode
 // @match       *://*/*
-// @version     1.3.3
+// @version     1.3.4
 // @grant       none
 // @downloadURL https://github.com/calraith/gm_scripts/raw/master/Alt+Num_Extended_Char_Entry.user.js
 // @run-at      document-end
@@ -169,8 +169,10 @@ function simulateNumPad(e) {
 
 		// if key combo doesn't start with a zero, retrieve codepage table glyph
 		// alt+0176 = °, whereas alt+234 = Ω (for codepage 437)
-		symbol = (combo[0] && (combo.join('') * 1 <= 255)) ?
-			cptable[codepage].dec[combo.join('')] : String.fromCharCode(combo.join(''));
+		symbol = (combo[0] && (combo.join('') * 1 <= 31)) ?
+			"0☺☻♥♦♣♠•◘○◙♂♀♪♫☼►◄↕‼¶§▬↨↑↓→←∟↔▲▼".substr(combo.join('') * 1, 1) : (
+			(combo[0] && (combo.join('') * 1 <= 255)) ?
+			cptable[codepage].dec[combo.join('')] : String.fromCharCode(combo.join('')));
 
 		console.log('Alt+' + combo.join('') + ' symbol: ' + symbol);
 
