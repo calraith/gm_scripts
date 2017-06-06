@@ -3,7 +3,7 @@
 // @namespace   https://stackapps.org/
 // @description hold Alt while pressing numbers to make extended characters
 // @match       *://*/*
-// @version     1.3
+// @version     1.3.1
 // @grant       none
 // @downloadURL https://github.com/calraith/gm_scripts/raw/master/Alt+Num_Extended_Char_Entry.user.js
 // @run-at      document-end
@@ -95,7 +95,7 @@ function init(obj) {
 	}
 	catch(err) {
 		console.log(err.message);
-		console.log('OEM codepage translations unavailable.  Well, crap.');
+		console.log('Codepage translations unavailable.  Well, crap.');
 	}
 }
 init({src: ["bits/" + codepage + ".js"], idx: 0});
@@ -155,11 +155,6 @@ function simulateNumPad(e) {
 
 		// keyCode 48 = 0, 49 = 1, 50 = 2, etc.
 		if (e.keyCode >= 48 && e.keyCode <= 57) combo.push(e.keyCode - 48);
-
-		// Unicode translation of already entered string
-		else if (e.keyCode == 88) {
-			doThatUnicodeThing({el: el, start: start, end: end});
-		}
 
 	} else if (combo.length) {
 
@@ -255,8 +250,10 @@ function doThatUnicodeThing(args) {
 		// hack for Chrome
 		if (!sel.rangeCount) sel = clicked.ownerDocument.defaultView.getSelection();
 
-		for (var i=0; i<6; i++) sel.modify("extend", "backward", "character");
+		// extend selection backward until selection is 6 chars long, unless at BOF
+		var i=0; while (i++ < 6 && sel.toString().length <= 6) sel.modify("extend", "backward", "character");
 
+		// limit regex test to 6 characters behind the text caret
 		var contents = sel.toString();
 
 		if (rxp.test(contents)) {
@@ -264,9 +261,13 @@ function doThatUnicodeThing(args) {
 			var symbol = String.fromCharCode('0x' + RegExp.$3);
 			console.log(RegExp.$1 + ' symbol: ' + symbol);
 
+			// replace regex match with symbol
+			sel.collapseToEnd();
+			for (var i = RegExp.$3.length; i--;) sel.modify("extend", "backward", "character");
+
 			range = sel.getRangeAt(0);
 			range.deleteContents();
-			range.insertNode(document.createTextNode(contents.replace(RegExp.$1, symbol)));
+			range.insertNode(document.createTextNode(symbol));
 			combo = [];
 		}
 
