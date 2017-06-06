@@ -1,13 +1,17 @@
 // ==UserScript==
 // @name        Alt+Num Extended Char Entry
 // @namespace   https://stackapps.org/
-// @description hold Alt while pressing numbers to make extended characters
+// @description Alt+numbers for extended characters; Alt+x convert hex value preceding caret to Unicode
 // @match       *://*/*
-// @version     1.3.2
+// @version     1.3.3
 // @grant       none
 // @downloadURL https://github.com/calraith/gm_scripts/raw/master/Alt+Num_Extended_Char_Entry.user.js
 // @run-at      document-end
 // ==/UserScript==
+
+/* =================================================================================
+ * For a full explanation of this script, see https://superuser.com/a/1216294/204705
+ * ================================================================================= */
 
 if (self != top) return; // only run in parent window
 
@@ -238,7 +242,7 @@ function doThatUnicodeThing(args) {
 
 			var symbol = String.fromCharCode('0x' + RegExp.$3),
 				val = args.el.value.substring(0, args.start),
-				newval = val.replace(RegExp.$1, symbol),
+				newval = val.replace(rxp, symbol),
 				start = args.start - (val.length - newval.length);
 
 			console.log(RegExp.$1 + ' symbol: ' + symbol);
@@ -268,7 +272,7 @@ function doThatUnicodeThing(args) {
 
 			// replace regex match with symbol
 			sel.collapseToEnd();
-			for (var i = RegExp.$3.length; i--;) sel.modify("extend", "backward", "character");
+			for (var i = RegExp.$1.length; i--;) sel.modify("extend", "backward", "character");
 
 			range = sel.getRangeAt(0);
 			range.deleteContents();
