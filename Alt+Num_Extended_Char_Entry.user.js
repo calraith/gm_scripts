@@ -3,7 +3,7 @@
 // @namespace   https://stackapps.org/
 // @description hold Alt while pressing numbers to make extended characters
 // @match       *://*/*
-// @version     1.2.3
+// @version     1.3
 // @grant       none
 // @downloadURL https://github.com/calraith/gm_scripts/raw/master/Alt+Num_Extended_Char_Entry.user.js
 // @run-at      document-end
@@ -13,8 +13,8 @@ if (self != top) return; // only run in parent window
 
 var codepage = 0; // Leave 0 to attempt autodetect, or specify with "var codepage = 437" or similar.
 
-// If you're curious about the source of this list, I used a PowerShell command similar
-// to the following: (new-object System.Globalization.CultureInfo($locale)).TextInfo.OEMCodePage
+// If you're curious about the source of these lists, I used a PowerShell command similar
+// to the following: (new-object System.Globalization.CultureInfo($locale)).TextInfo.OEMCodePage (or MacCodePage)
 // with language tags from the MS-LCID reference at https://msdn.microsoft.com/en-us/library/cc233965.aspx
 var OEMCodePages = {'437':['ha-latn-gh','ha-latn-ne','ngo','ngo-gn','swc','swc-cd','sw-tz','sw-ug','yo-bj','yue',
 	'yue-hk','en','sw','iu','fil','ha','yo','ig','haw','rw','en-us','sw-ke','fil-ph','ha-latn-ng','yo-ng','ig-ng',
@@ -59,6 +59,7 @@ var combo = [],
 	clicked; // Chrome failsafe
 
 addEventListener('keyup', safeSimulateNumPad);
+addEventListener('keydown', safeSimulateWordAltX);
 addEventListener('load', iFramesToo);
 
 function iFramesToo() {
@@ -68,6 +69,7 @@ function iFramesToo() {
 		try {
 			if (iframes[i].contentWindow) {
 				iframes[i].contentWindow.addEventListener('keyup', safeSimulateNumPad);
+				iframes[i].contentWindow.addEventListener('keydown', safeSimulateWordAltX);
 				// Chrome failsafe
 				iframes[i].contentWindow.addEventListener('click', function(e) { clicked = e.target; });
 			}
@@ -93,7 +95,7 @@ function init(obj) {
 	}
 	catch(err) {
 		console.log(err.message);
-		console.log('Codepage translations unavailable.  Only Unicode key combos will work.');
+		console.log('OEM codepage translations unavailable.  Well, crap.');
 	}
 }
 init({src: ["cptable.js","cputils.js"], idx: 0});
@@ -101,6 +103,36 @@ init({src: ["cptable.js","cputils.js"], idx: 0});
 function safeSimulateNumPad(e) {
 	try { simulateNumPad(e); }
 	catch(err) { console.log(err.message); }
+}
+
+function safeSimulateWordAltX(e) {
+	try { simulateWordAltX(e); }
+	catch(err) { console.log(err.message); }
+}
+
+function simulateWordAltX(e) {
+	var el = getActiveElement() || clicked,
+		start = el.selectionStart,
+		end = el.selectionEnd,
+		symbol;
+
+	if (!el) console.log('unable to determine focus');
+
+	// Chrome doesn't reliably bubble up the .isContentEditable property
+	if (!/chrome/i.test(navigator.userAgent) && !/textarea|input/i.test(el.nodeName) &&
+		!el.isContentEditable) return;
+
+	if (e.altKey) {
+
+		// if alt key is pressed, prevent browser menubar from appearing
+		e.preventDefault();
+
+		// 88 = x
+		if (e.keyCode == 88) {
+			doThatUnicodeThing({el: el, start: start, end: end});
+		}
+
+	}
 }
 
 function simulateNumPad(e) {
@@ -124,6 +156,11 @@ function simulateNumPad(e) {
 		// keyCode 48 = 0, 49 = 1, 50 = 2, etc.
 		if (e.keyCode >= 48 && e.keyCode <= 57) combo.push(e.keyCode - 48);
 
+		// Unicode translation of already entered string
+		else if (e.keyCode == 88) {
+			doThatUnicodeThing({el: el, start: start, end: end});
+		}
+
 	} else if (combo.length) {
 
 		// if key combo doesn't start with a zero, retrieve codepage table glyph
@@ -131,7 +168,7 @@ function simulateNumPad(e) {
 		symbol = (combo[0] && (combo.join('') * 1 <= 255)) ?
 			cptable[codepage].dec[combo.join('')] : String.fromCharCode(combo.join(''));
 
-		console.log('symbol: ' + symbol);
+		console.log('Alt+' + combo.join('') + ' symbol: ' + symbol);
 
 		// purge key sequence
 		combo = [];
@@ -150,8 +187,7 @@ function simulateNumPad(e) {
 				range;
 
 			// hack for Chrome
-			if (!sel.rangeCount)
-				sel = clicked.ownerDocument.defaultView.getSelection();
+			if (!sel.rangeCount) sel = clicked.ownerDocument.defaultView.getSelection();
 
 			range = sel.getRangeAt(0);
 			range.deleteContents();
@@ -189,4 +225,51 @@ function getActiveElement(document) {
 	else return el;
 
 	return false;
-};
+}
+
+function doThatUnicodeThing(args) {
+	// args == {el: focused element, start: selection start, end: selection end}
+	var rxp = /((0x|\\?[xuU]\+?)?([0-9a-fA-F]{2,4}))$/;
+
+	if (args.el.setSelectionRange) {
+
+		// input, textarea
+		if (rxp.test(args.el.value.substring(0,args.start))) {
+
+			var symbol = String.fromCharCode('0x' + RegExp.$3),
+				val = args.el.value.substring(0, args.start),
+				newval = val.replace(RegExp.$1, symbol),
+				start = args.start - (val.length - newval.length);
+
+			console.log(RegExp.$1 + ' symbol: ' + symbol);
+			args.el.value = newval + args.el.value.substring(args.end);
+			args.el.setSelectionRange(start, start);
+			combo = [];
+		}
+	} else {
+
+		// contentEditable node
+		var sel = args.el.ownerDocument.defaultView.getSelection(),
+			range;
+
+		// hack for Chrome
+		if (!sel.rangeCount) sel = clicked.ownerDocument.defaultView.getSelection();
+
+		for (var i=0; i<6; i++) sel.modify("extend", "backward", "character");
+
+		var contents = sel.toString();
+
+		if (rxp.test(contents)) {
+
+			var symbol = String.fromCharCode('0x' + RegExp.$3);
+			console.log(RegExp.$1 + ' symbol: ' + symbol);
+
+			range = sel.getRangeAt(0);
+			range.deleteContents();
+			range.insertNode(document.createTextNode(contents.replace(RegExp.$1, symbol)));
+			combo = [];
+		}
+
+		sel.collapseToEnd();
+	}
+}
