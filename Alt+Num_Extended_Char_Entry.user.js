@@ -98,7 +98,7 @@ function init(obj) {
 		console.log('OEM codepage translations unavailable.  Well, crap.');
 	}
 }
-init({src: ["bits/" + codepage + ".js","cputils.js"], idx: 0});
+init({src: ["bits/" + codepage + ".js"], idx: 0});
 
 function safeSimulateNumPad(e) {
 	try { simulateNumPad(e); }
