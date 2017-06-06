@@ -3,7 +3,7 @@
 // @namespace   https://stackapps.org/
 // @description hold Alt while pressing numbers to make extended characters
 // @match       *://*/*
-// @version     1.2.2
+// @version     1.2.3
 // @grant       none
 // @downloadURL https://github.com/calraith/gm_scripts/raw/master/Alt+Num_Extended_Char_Entry.user.js
 // @run-at      document-end
@@ -16,37 +16,43 @@ var codepage = 0; // Leave 0 to attempt autodetect, or specify with "var codepag
 // If you're curious about the source of this list, I used a PowerShell command similar
 // to the following: (new-object System.Globalization.CultureInfo($locale)).TextInfo.OEMCodePage
 // with language tags from the MS-LCID reference at https://msdn.microsoft.com/en-us/library/cc233965.aspx
-if (!codepage) codepage = {'ar':720,'bg':866,'ca':850,'zh-hans':936,'cs':852,'da':850,'de':850,'el':737,'en':437,
-	'es':850,'fi':850,'fr':850,'he':862,'hu':852,'is':850,'it':850,'ja':932,'ko':949,'nl':850,'no':850,'pl':852,
-	'pt':850,'ro':852,'ru':866,'sk':852,'sq':852,'sv':850,'th':874,'tr':857,'ur':720,'id':850,'uk':866,'be':866,
-	'sl':852,'et':775,'lv':775,'lt':775,'fa':720,'vi':1258,'hy':1,'az':857,'eu':850,'mk':866,'af':850,'ka':1,
-	'fo':850,'hi':1,'ms':850,'kk':866,'ky':866,'sw':437,'uz':857,'tt':866,'pa':1,'gu':1,'ta':1,'te':1,'kn':1,
-	'mr':1,'sa':1,'mn':866,'gl':850,'kok':1,'syr':1,'dv':1,'ar-sa':720,'bg-bg':866,'ca-es':850,'zh-tw':950,
-	'cs-cz':852,'da-dk':850,'de-de':850,'el-gr':737,'en-us':437,'es-es_tradnl':850,'fi-fi':850,'fr-fr':850,
-	'he-il':862,'hu-hu':852,'is-is':850,'it-it':850,'ja-jp':932,'ko-kr':949,'nl-nl':850,'nb-no':850,'pl-pl':852,
-	'pt-br':850,'rm-ch':850,'ro-ro':852,'ru-ru':866,'hr-hr':852,'sk-sk':852,'sq-al':852,'sv-se':850,'th-th':874,
-	'tr-tr':857,'ur-pk':720,'id-id':850,'uk-ua':866,'be-by':866,'sl-si':852,'et-ee':775,'lv-lv':775,'lt-lt':775,
-	'tg-cyrl-tj':866,'fa-ir':720,'vi-vn':1258,'hy-am':1,'az-latn-az':857,'eu-es':850,'hsb-de':850,'mk-mk':866,
-	'tn-za':850,'xh-za':850,'zu-za':850,'af-za':850,'ka-ge':1,'fo-fo':850,'hi-in':1,'mt-mt':1,'se-no':850,
-	'ms-my':850,'kk-kz':866,'ky-kg':866,'sw-ke':437,'tk-tm':852,'uz-latn-uz':857,'tt-ru':866,'bn-in':1,'pa-in':1,
-	'gu-in':1,'or-in':1,'ta-in':1,'te-in':1,'kn-in':1,'ml-in':1,'as-in':1,'mr-in':1,'sa-in':1,'mn-mn':866,
-	'bo-cn':1,'cy-gb':850,'km-kh':1,'lo-la':1,'gl-es':850,'kok-in':1,'syr-sy':1,'si-lk':1,'iu-cans-ca':1,
-	'am-et':1,'ne-np':1,'fy-nl':850,'ps-af':1,'fil-ph':437,'dv-mv':1,'ha-latn-ng':437,'yo-ng':437,'quz-bo':850,
-	'nso-za':850,'ba-ru':866,'lb-lu':850,'kl-gl':850,'ig-ng':437,'ii-cn':1,'arn-cl':850,'moh-ca':850,'br-fr':850,
-	'ug-cn':720,'mi-nz':1,'oc-fr':850,'co-fr':850,'gsw-fr':850,'sah-ru':866,'qut-gt':850,'rw-rw':437,'wo-sn':850,
-	'prs-af':720,'gd-gb':850,'ar-iq':720,'zh-cn':936,'de-ch':850,'en-gb':850,'es-mx':850,'fr-be':850,'it-ch':850,
-	'nl-be':850,'nn-no':850,'pt-pt':850,'sr-latn-cs':852,'sv-fi':850,'az-cyrl-az':866,'dsb-de':850,'se-se':850,
-	'ga-ie':850,'ms-bn':850,'uz-cyrl-uz':866,'bn-bd':1,'mn-mong-cn':1,'iu-latn-ca':437,'tzm-latn-dz':850,
-	'quz-ec':850,'ar-eg':720,'zh-hk':950,'de-at':850,'en-au':850,'es-es':850,'fr-ca':850,'sr-cyrl-cs':855,
-	'se-fi':850,'quz-pe':850,'ar-ly':720,'zh-sg':936,'de-lu':850,'en-ca':850,'es-gt':850,'fr-ch':850,'hr-ba':852,
-	'smj-no':850,'ar-dz':720,'zh-mo':950,'de-li':850,'en-nz':850,'es-cr':850,'fr-lu':850,'bs-latn-ba':852,
-	'smj-se':850,'ar-ma':720,'en-ie':850,'es-pa':850,'fr-mc':850,'sr-latn-ba':852,'sma-no':850,'ar-tn':720,
-	'en-za':437,'es-do':850,'sr-cyrl-ba':855,'sma-se':850,'ar-om':720,'en-jm':850,'es-ve':850,'bs-cyrl-ba':855,
-	'sms-fi':850,'ar-ye':720,'en-029':850,'es-co':850,'sr-latn-rs':852,'smn-fi':850,'ar-sy':720,'en-bz':850,
-	'es-pe':850,'sr-cyrl-rs':855,'ar-jo':720,'en-tt':850,'es-ar':850,'sr-latn-me':852,'ar-lb':720,'en-zw':437,
-	'es-ec':850,'sr-cyrl-me':855,'ar-kw':720,'en-ph':437,'es-cl':850,'ar-ae':720,'es-uy':850,'ar-bh':720,
-	'es-py':850,'ar-qa':720,'en-in':437,'es-bo':850,'en-my':437,'es-sv':850,'en-sg':437,'es-hn':850,'es-ni':850,
-	'es-pr':850,'es-us':850,'zh-hant':950,'sr':855}[navigator.language.toLowerCase()] || 437; // (default en-US)
+var OEMCodePages = {'437':['ha-latn-gh','ha-latn-ne','ngo','ngo-gn','swc','swc-cd','sw-tz','sw-ug','yo-bj','yue',
+	'yue-hk','en','sw','iu','fil','ha','yo','ig','haw','rw','en-us','sw-ke','fil-ph','ha-latn-ng','yo-ng','ig-ng',
+	'haw-us','rw-rw','iu-latn-ca','en-za','en-zw','en-ph','en-in','en-my','en-sg','iu-latn','ha-latn'],'720':[
+	'ar-001','ar-dj','ar-er','ar-il','ar-km','ar-mr','ar-ps','ar-sd','ar-so','ar-ss','ar-td','fa-af','ar','ur',
+	'fa','sd','ug','prs','ku','ar-sa','ur-pk','fa-ir','ug-cn','prs-af','ku-arab-iq','ar-iq','ur-in','pa-arab-pk',
+	'sd-arab-pk','qps-plocm','ar-eg','ar-ly','ar-dz','ar-ma','ar-tn','ar-om','ar-ye','ar-sy','ar-jo','ar-lb',
+	'ar-kw','ar-ae','ar-bh','ar-qa','pa-arab','sd-arab','ku-arab'],'737':['el-cy','el','el-gr'],'775':['et','lv',
+	'lt','et-ee','lv-lv','lt-lt'],'852':['sq-mk','cs','hu','pl','ro','sk','sq','sl','tk','cs-cz','hu-hu','pl-pl',
+	'ro-ro','hr-hr','sk-sk','sq-al','sl-si','tk-tm','qps-ploc','ro-md','sr-latn-cs','hr-ba','bs-latn-ba',
+	'sr-latn-ba','sr-latn-rs','sr-latn-me','bs-latn','sr-latn','bs','sr'],'855':['sr-cyrl-cs','sr-cyrl-ba',
+	'bs-cyrl-ba','sr-cyrl-rs','sr-cyrl-me','bs-cyrl','sr-cyrl'],'857':['tr-cy','tr','az','uz','tr-tr',
+	'az-latn-az','uz-latn-uz','az-latn','uz-latn'],'862':['he','he-il'],'866':['ru-by','ru-kg','ru-kz','ru-ua',
+	'bg','ru','uk','be','tg','mk','ky','tt','mn','ba','sah','bg-bg','ru-ru','uk-ua','be-by','tg-cyrl-tj','mk-mk',
+	'ky-kg','tt-ru','mn-mn','ba-ru','sah-ru','ru-md','az-cyrl-az','uz-cyrl-uz','az-cyrl','uz-cyrl','mn-cyrl',
+	'tg-cyrl'],'874':['th','th-th'],'932':['ja','ja-jp','qps-ploca'],'936':['zh-hans','zh-cn','zh-sg','zh'],
+	'949':['ko','ko-kr'],'950':['zh-tw','zh-hk','zh-mo','zh-hant'],'1258':['vi','vi-vn']};
+
+var MacCodePages = {'10001':['ja','ja-jp','qps-ploca'],'10081':['tr','az','tr-tr','az-latn-az','az-latn','tr-cy'],
+	'10008':['zh-hans','zh-cn','zh-sg','zh'],'10006':['el','el-gr','el-cy'],'10079':['is','fo','is-is','fo-fo'],
+	'10007':['bg','ru','be','tg','mk','ky','tt','mn','ba','sah','bg-bg','ru-ru','be-by','tg-cyrl-tj','mk-mk',
+	'ky-kg','tt-ru','mn-mn','ba-ru','sah-ru','az-cyrl-az','uz-cyrl-uz','sr-cyrl-cs','sr-cyrl-ba','sr-cyrl-rs',
+	'sr-cyrl-me','sr-cyrl','az-cyrl','uz-cyrl','mn-cyrl','tg-cyrl'],'10004':['ar','ur','fa','sd','ug','prs','ku',
+	'ar-sa','ur-pk','fa-ir','ug-cn','prs-af','ku-arab-iq','ar-iq','pa-arab-pk','sd-arab-pk','qps-plocm','ar-eg',
+	'ar-ly','ar-dz','ar-ma','ar-tn','ar-om','ar-ye','ar-sy','ar-jo','ar-lb','ar-kw','ar-ae','ar-bh','ar-qa',
+	'pa-arab','sd-arab','ku-arab','ar-001','ar-dj','ar-er','ar-il','ar-km','ar-mr','ar-ps','ar-sd','ar-so',
+	'ar-ss','ar-td','fa-af'],'10003':['ko','ko-kr'],'10005':['he','he-il'],'10029':['cs','hu','pl','ro','sk','sq',
+	'sl','et','lv','lt','tk','uz','cs-cz','hu-hu','pl-pl','ro-ro','sk-sk','sq-al','sl-si','et-ee','lv-lv','lt-lt',
+	'tk-tm','uz-latn-uz','qps-ploc','sr-latn-cs','sr-latn-rs','sr-latn-me','sr-latn','sr','uz-latn','sq-mk'],
+	'10002':['zh-tw','zh-hk','zh-mo','zh-hant'],'10021':['th','th-th'],'10082':['hr-hr','hr-ba','bs-latn-ba',
+	'sr-latn-ba','bs-cyrl-ba','bs-cyrl','bs-latn','bs'],'10017':['uk','uk-ua']};
+
+// default codepage to that which contains the greatest number of locales per platform to reduce table sizes
+var cp = /mac/i.test(navigator.platform) ? { t: MacCodePages, d: 10000 } : { t: OEMCodePages, d: 850 };
+
+if (!codepage) codepage = Object.keys(cp.t).filter(function(key) {
+	return cp.t[key].indexOf(navigator.language.toLowerCase()) > -1;
+}) * 1 || cp.d;
 
 // holds a list of number keys pressed while alt is held down
 var combo = [],
