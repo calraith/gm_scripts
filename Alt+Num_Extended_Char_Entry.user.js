@@ -3,7 +3,7 @@
 // @namespace   https://stackapps.org/
 // @description hold Alt while pressing numbers to make extended characters
 // @match       *://*/*
-// @version     1.3.1
+// @version     1.3.2
 // @grant       none
 // @downloadURL https://github.com/calraith/gm_scripts/raw/master/Alt+Num_Extended_Char_Entry.user.js
 // @run-at      document-end
@@ -95,7 +95,12 @@ function init(obj) {
 	}
 	catch(err) {
 		console.log(err.message);
-		console.log('Codepage translations unavailable.  Well, crap.');
+		if (codepage == cp.d)
+			console.log('OEM codepage ' + codepage + ' translations unavailable.  Well, crap.');
+		else {
+			console.log('OEM codepage ' + codepage + ' translations unavailable.  Defaulting to ' + cp.d + '.');
+			init({src: ["bits/" + cp.d + ".js"], idx: 0});
+		}
 	}
 }
 init({src: ["bits/" + codepage + ".js"], idx: 0});
@@ -224,7 +229,7 @@ function getActiveElement(document) {
 
 function doThatUnicodeThing(args) {
 	// args == {el: focused element, start: selection start, end: selection end}
-	var rxp = /((0x|\\?[xuU]\+?)?([0-9a-fA-F]{2,4}))$/;
+	var rxp = /((0x|\\?[xuU]\+?)?([0-9a-fA-F]{2,5}))$/;
 
 	if (args.el.setSelectionRange) {
 
@@ -250,8 +255,8 @@ function doThatUnicodeThing(args) {
 		// hack for Chrome
 		if (!sel.rangeCount) sel = clicked.ownerDocument.defaultView.getSelection();
 
-		// extend selection backward until selection is 6 chars long, unless at BOF
-		var i=0; while (i++ < 6 && sel.toString().length <= 6) sel.modify("extend", "backward", "character");
+		// extend selection backward until selection is 7 chars long, unless at BOF
+		var i=0; while (i++ < 7 && sel.toString().length <= 7) sel.modify("extend", "backward", "character");
 
 		// limit regex test to 6 characters behind the text caret
 		var contents = sel.toString();
