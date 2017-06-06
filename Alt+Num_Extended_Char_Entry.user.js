@@ -169,7 +169,7 @@ function simulateNumPad(e) {
 
 		// if key combo doesn't start with a zero, retrieve codepage table glyph
 		// alt+0176 = °, whereas alt+234 = Ω (for codepage 437)
-		symbol = (combo[0] && (combo.join('') * 1 <= 31)) ?
+		symbol = (combo[0] && (combo.join('') * 1 <= 31) && cptable[codepage].dec[1] == "\u0001") ?
 			"0☺☻♥♦♣♠•◘○◙♂♀♪♫☼►◄↕‼¶§▬↨↑↓→←∟↔▲▼".substr(combo.join('') * 1, 1) : (
 			(combo[0] && (combo.join('') * 1 <= 255)) ?
 			cptable[codepage].dec[combo.join('')] : String.fromCharCode(combo.join('')));
