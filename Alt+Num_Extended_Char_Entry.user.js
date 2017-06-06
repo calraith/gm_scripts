@@ -262,7 +262,7 @@ function doThatUnicodeThing(args) {
 		// extend selection backward until selection is 7 chars long, unless at BOF
 		var i=0; while (i++ < 7 && sel.toString().length <= 7) sel.modify("extend", "backward", "character");
 
-		// limit regex test to 6 characters behind the text caret
+		// limit regex test to 7 characters behind the text caret
 		var contents = sel.toString();
 
 		if (rxp.test(contents)) {
