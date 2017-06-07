@@ -3,7 +3,7 @@
 // @namespace   https://stackapps.org/
 // @description Alt+numbers for extended characters; Alt+x convert hex value preceding caret to Unicode
 // @match       *://*/*
-// @version     1.3.4
+// @version     1.3.5
 // @grant       none
 // @downloadURL https://github.com/calraith/gm_scripts/raw/master/Alt+Num_Extended_Char_Entry.user.js
 // @run-at      document-end
@@ -138,7 +138,12 @@ function simulateWordAltX(e) {
 
 		// 88 = x
 		if (e.keyCode == 88) {
-			doThatUnicodeThing({el: el, start: start, end: end});
+			
+			// if shift key is pressed, convert Unicode char back to numeral
+			if (e.shiftKey)
+				undoThatUnicodeThing({el: el, start: start, end: end});
+			else
+				doThatUnicodeThing({el: el, start: start, end: end});
 		}
 
 	}
@@ -284,4 +289,54 @@ function doThatUnicodeThing(args) {
 
 		sel.collapseToEnd();
 	}
+}
+
+function undoThatUnicodeThing(args) {
+	// args == {el: focused element, start: selection start, end: selection end}
+
+	if (args.el.setSelectionRange) {
+
+		// input, textarea
+		if (!args.start) return;
+
+		if (args.start == args.end) args.el.setSelectionRange(--args.start, args.end);
+
+		var str = args.el.value.substring(args.start, args.end),
+
+		str = str.replace(/./g, function(i) {
+			console.log(i + ' value: ' + i.charCodeAt(0).toString(16));
+			return 'U+' + i.charCodeAt(0).toString(16);
+		});
+
+		args.el.value = args.el.value.substring(0, args.start) + str + args.el.value.substring(args.end);
+		start = args.el.value.substring(0, args.start).length + str.length;
+
+		args.el.setSelectionRange(start, start);
+
+	} else {
+
+		// contentEditable node
+		var sel = args.el.ownerDocument.defaultView.getSelection(),
+			range;
+
+		// hack for Chrome
+		if (!sel.rangeCount) sel = clicked.ownerDocument.defaultView.getSelection();
+
+		if (!sel.toString().length) sel.modify("extend", "backward", "character");
+		if (!sel.toString().length) return;
+
+		var str = sel.toString();
+
+		str = str.replace(/./g, function(i) {
+			console.log(i + ' value: ' + i.charCodeAt(0).toString(16));
+			return 'U+' + i.charCodeAt(0).toString(16);
+		});
+
+		range = sel.getRangeAt(0);
+		range.deleteContents();
+		range.insertNode(document.createTextNode(str));
+
+		sel.collapseToEnd();
+	}
+	combo = [];
 }
