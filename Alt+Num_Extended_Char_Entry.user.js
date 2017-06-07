@@ -3,7 +3,7 @@
 // @namespace   https://stackapps.org/
 // @description Alt+numbers for extended characters; Alt+x convert hex value preceding caret to Unicode
 // @match       *://*/*
-// @version     1.3.5
+// @version     1.3.6
 // @grant       none
 // @downloadURL https://github.com/calraith/gm_scripts/raw/master/Alt+Num_Extended_Char_Entry.user.js
 // @run-at      document-end
@@ -203,6 +203,7 @@ function simulateNumPad(e) {
 			range = sel.getRangeAt(0);
 			range.deleteContents();
 			range.insertNode(document.createTextNode(symbol));
+			range.detach();
 			sel.collapseToEnd();
 		}
 	}
@@ -284,6 +285,7 @@ function doThatUnicodeThing(args) {
 			range = sel.getRangeAt(0);
 			range.deleteContents();
 			range.insertNode(document.createTextNode(symbol));
+			range.detach();
 			combo = [];
 		}
 
@@ -335,6 +337,7 @@ function undoThatUnicodeThing(args) {
 		range = sel.getRangeAt(0);
 		range.deleteContents();
 		range.insertNode(document.createTextNode(str));
+		range.detach();
 
 		sel.collapseToEnd();
 	}
